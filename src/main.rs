@@ -1,8 +1,8 @@
 use clap::{App, Arg};
 
 mod commands;
-
-use commands::single::get_single_dominant_color;
+mod core;
+mod utils;
 
 const PKG_NAME: &'static str = env!("CARGO_PKG_NAME");
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
@@ -10,21 +10,22 @@ const AUTHOR: &'static str = env!("CARGO_PKG_AUTHORS");
 const DESCRIPTION: &'static str = env!("CARGO_PKG_DESCRIPTION");
 
 fn main() {
-    let single = Arg::with_name("single")
-        .long("single")
-        .value_name("IMAGE PATH")
-        .help("calculate single image dominant color")
+    let config = Arg::with_name("config")
+        .short("c")
+        .long("config")
+        .value_name("FILE PATH")
+        .help("read config")
         .takes_value(true);
 
     let matches = App::new(PKG_NAME)
         .version(VERSION)
         .author(AUTHOR)
         .about(DESCRIPTION)
-        .args(&vec![single])
+        .args(&vec![config])
         .get_matches();
 
-    match matches.value_of("single") {
-        Some(path) => return get_single_dominant_color(path),
+    match matches.value_of("config") {
+        Some(path) => println!("{}", path),
         None => {}
     }
 }
