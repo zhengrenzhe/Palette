@@ -3,11 +3,11 @@ use serde_json::{self, Error};
 use std::fs::File;
 use std::io::Read;
 
-pub mod config_model;
-pub mod config_result;
+mod config_model;
+mod config_result;
 
-use crate::core::pre_process::config_model::ConfigModel;
-use crate::core::pre_process::config_result::ConfigResult;
+pub use crate::core::pre_process::config_model::ConfigModel;
+pub use crate::core::pre_process::config_result::ConfigResult;
 use crate::utils::log;
 
 pub fn pre_process(config_path: &str) -> ConfigResult {
