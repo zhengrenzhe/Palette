@@ -5,11 +5,7 @@ mod core;
 mod utils;
 
 use crate::utils::log;
-
-const PKG_NAME: &'static str = env!("CARGO_PKG_NAME");
-const VERSION: &'static str = env!("CARGO_PKG_VERSION");
-const AUTHOR: &'static str = env!("CARGO_PKG_AUTHORS");
-const DESCRIPTION: &'static str = env!("CARGO_PKG_DESCRIPTION");
+use crate::utils::msg_const;
 
 fn main() {
     let config = Arg::with_name("config")
@@ -19,10 +15,10 @@ fn main() {
         .help("read config")
         .takes_value(true);
 
-    let matches = App::new(PKG_NAME)
-        .version(VERSION)
-        .author(AUTHOR)
-        .about(DESCRIPTION)
+    let matches = App::new(msg_const::PKG_NAME)
+        .version(msg_const::VERSION)
+        .author(msg_const::AUTHOR)
+        .about(msg_const::DESCRIPTION)
         .args(&vec![config])
         .get_matches();
 
