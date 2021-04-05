@@ -1,12 +1,14 @@
 use num_cpus;
 use std::cmp::max;
 
+use crate::core::file::FileLoad;
 use crate::core::pre_process::ConfigResult;
 use crate::utils::log;
 
 pub struct Scheduler {
     config: ConfigResult,
     cpu_cores: usize,
+    file_load: FileLoad,
 }
 
 impl Scheduler {
@@ -16,6 +18,7 @@ impl Scheduler {
         Scheduler {
             config,
             cpu_cores: num_cpus::get_physical(),
+            file_load: FileLoad::new(),
         }
     }
 
