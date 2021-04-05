@@ -9,3 +9,5 @@ description = "single-machine large-scale calculation of dominant color solution
 
 [dependencies]
 clap = "2.33.0"
+mozjpeg = "0.8.24"
+png = "0.16.8"
