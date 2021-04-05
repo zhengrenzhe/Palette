@@ -1,7 +1,5 @@
 use glob::glob;
-use serde::Deserialize;
 use serde_json::{self, Error};
-use std::ffi::OsString;
 use std::fs::File;
 use std::io::Read;
 

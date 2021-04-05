@@ -39,4 +39,6 @@ fn start(config_path: &str) {
             "there are no jpg, png, jpeg files in the specified directory, process will stop",
         );
     }
+
+    log::success(&format!("The preparation work has been completed, there are currently {} images waiting to be calculated", res.images.len()))
 }
