@@ -4,6 +4,8 @@ mod commands;
 mod core;
 mod utils;
 
+use crate::utils::log;
+
 const PKG_NAME: &'static str = env!("CARGO_PKG_NAME");
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 const AUTHOR: &'static str = env!("CARGO_PKG_AUTHORS");
@@ -25,7 +27,16 @@ fn main() {
         .get_matches();
 
     match matches.value_of("config") {
-        Some(path) => println!("{}", path),
+        Some(config_path) => start(config_path),
         None => {}
+    }
+}
+
+fn start(config_path: &str) {
+    let res = core::pre_process::pre_process(config_path);
+    if res.images.len() == 0 {
+        return log::warning(
+            "there are no jpg, png, jpeg files in the specified directory, process will stop",
+        );
     }
 }
