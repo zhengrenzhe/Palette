@@ -27,26 +27,30 @@ pub fn pre_process(config_path: &str) -> ConfigResult {
 
             log::info("read the configuration successfully");
 
-            let cfg_data: Result<ConfigModel, Error> = serde_json::from_str(&content);
-            let cfg_data = match cfg_data {
-                Ok(cfg_data) => cfg_data,
-                Err(err) => {
-                    log::error(&format!("parse config json error: {}", err));
-                    return ConfigResult { images: vec![] };
-                }
-            };
-
-            log::info("parse the configuration successfully");
-
-            let images = scan_images(cfg_data);
-
-            ConfigResult { images }
+            parse_config(content)
         }
         Err(_) => {
             log::error(&format!("config file: \"{}\" can not open", config_path));
             return ConfigResult { images: vec![] };
         }
     }
+}
+
+fn parse_config(content: String) -> ConfigResult {
+    let cfg_data: Result<ConfigModel, Error> = serde_json::from_str(&content);
+    let cfg_data = match cfg_data {
+        Ok(cfg_data) => cfg_data,
+        Err(err) => {
+            log::error(&format!("parse config json error: {}", err));
+            return ConfigResult { images: vec![] };
+        }
+    };
+
+    log::info("parse the configuration successfully");
+
+    let images = scan_images(cfg_data);
+
+    ConfigResult { images }
 }
 
 fn scan_images(cfg: ConfigModel) -> Vec<String> {
@@ -74,4 +78,27 @@ fn scan_images(cfg: ConfigModel) -> Vec<String> {
     }
 
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::utils::msg_const::MANIFEST_DIR;
+
+    #[test]
+    fn test_parse_config() {
+        let invalid = format!("");
+        let result = parse_config(invalid);
+
+        assert_eq!(result.images.len(), 0);
+
+        let mut valid = format!(
+            "{}",
+            "{\"image_folder_root_path\": \"PLACEHOLDER/tests/image\", \"recursion\": true}"
+        );
+        valid = valid.replace("PLACEHOLDER", MANIFEST_DIR);
+        let result = parse_config(valid.clone());
+
+        assert_eq!(result.images.len(), 4);
+    }
 }

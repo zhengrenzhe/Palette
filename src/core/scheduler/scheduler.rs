@@ -25,7 +25,7 @@ impl Scheduler {
     pub fn start(&self) {
         log::info(&format!("cpu has {} physical cores", self.cpu_cores));
 
-        /// 计算线程数量为：cpu物理总核数 - 文件读取线程 - 图片解码线程
+        // 计算线程数量为：cpu物理总核数 - 文件读取线程 - 图片解码线程
         let calculate_cores = max(self.cpu_cores - 2, 1);
 
         log::info(&format!("threads allocation: [file load & result output thread] 1, [image decode thread] 1, [calculate thread] {}", calculate_cores));
