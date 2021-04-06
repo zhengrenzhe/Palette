@@ -83,7 +83,8 @@ fn scan_images(cfg: ConfigModel) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::msg_const::MANIFEST_DIR;
+
+    const MANIFEST_DIR: &'static str = env!("CARGO_MANIFEST_DIR");
 
     #[test]
     fn test_parse_config() {
