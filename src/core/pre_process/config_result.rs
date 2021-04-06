@@ -1,4 +1,6 @@
+use std::sync::Arc;
+
 #[derive(Debug)]
 pub struct ConfigResult {
-    pub images: Vec<String>,
+    pub images: Arc<Vec<String>>,
 }

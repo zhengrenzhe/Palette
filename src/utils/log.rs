@@ -1,4 +1,5 @@
 use colored::*;
+use std::thread;
 
 enum LogType {
     Info,
@@ -25,18 +26,26 @@ fn wrap(log_type: LogType) -> String {
     }
 }
 
+fn get_thread_info() -> String {
+    let info = match thread::current().name() {
+        None => format!("{:?}", thread::current().id()),
+        Some(name) => String::from(name),
+    };
+    format!("[{}]", info).bright_blue().to_string()
+}
+
 pub fn info(msg: &str) {
-    println!("{} {}", wrap(LogType::Info), msg)
+    println!("{}{} {}", get_thread_info(), wrap(LogType::Info), msg)
 }
 
 pub fn error(msg: &str) {
-    println!("{} {}", wrap(LogType::Error), msg)
+    println!("{}{} {}", get_thread_info(), wrap(LogType::Error), msg)
 }
 
 pub fn success(msg: &str) {
-    println!("{} {}", wrap(LogType::Success), msg)
+    println!("{}{} {}", get_thread_info(), wrap(LogType::Success), msg)
 }
 
 pub fn warning(msg: &str) {
-    println!("{} {}", wrap(LogType::Warning), msg)
+    println!("{}{} {}", get_thread_info(), wrap(LogType::Warning), msg)
 }

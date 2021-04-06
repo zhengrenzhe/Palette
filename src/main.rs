@@ -1,4 +1,5 @@
 use clap::{App, Arg};
+use std::sync::Arc;
 
 mod commands;
 mod core;
@@ -38,5 +39,5 @@ fn start(config_path: &str) {
 
     log::success(&format!("The preparation work has been completed, there are currently {} images waiting to be calculated", cfg.images.len()));
 
-    Scheduler::new(cfg).start();
+    Scheduler::new(Arc::new(cfg)).start();
 }

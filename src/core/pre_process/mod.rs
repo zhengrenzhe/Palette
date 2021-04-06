@@ -2,12 +2,14 @@ use glob::glob;
 use serde_json::{self, Error};
 use std::fs::File;
 use std::io::Read;
+use std::sync::Arc;
 
 mod config_model;
 mod config_result;
 
 pub use crate::core::pre_process::config_model::ConfigModel;
 pub use crate::core::pre_process::config_result::ConfigResult;
+
 use crate::utils::log;
 
 pub fn pre_process(config_path: &str) -> ConfigResult {
@@ -19,7 +21,9 @@ pub fn pre_process(config_path: &str) -> ConfigResult {
 
             if let Err(err) = file.read_to_string(&mut content) {
                 log::error(&format!("read config file error: {}", err));
-                return ConfigResult { images: vec![] };
+                return ConfigResult {
+                    images: Arc::new(vec![]),
+                };
             }
 
             log::info("read the configuration successfully");
@@ -28,7 +32,9 @@ pub fn pre_process(config_path: &str) -> ConfigResult {
         }
         Err(_) => {
             log::error(&format!("config file: \"{}\" can not open", config_path));
-            ConfigResult { images: vec![] }
+            ConfigResult {
+                images: Arc::new(vec![]),
+            }
         }
     }
 }
@@ -39,13 +45,15 @@ fn parse_config(content: String) -> ConfigResult {
         Ok(cfg_data) => cfg_data,
         Err(err) => {
             log::error(&format!("parse config json error: {}", err));
-            return ConfigResult { images: vec![] };
+            return ConfigResult {
+                images: Arc::new(vec![]),
+            };
         }
     };
 
     log::info("parse the configuration successfully");
 
-    let images = scan_images(cfg_data);
+    let images = Arc::new(scan_images(cfg_data));
 
     ConfigResult { images }
 }

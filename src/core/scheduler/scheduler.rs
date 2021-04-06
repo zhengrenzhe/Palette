@@ -1,5 +1,6 @@
 use num_cpus::get_physical;
 use std::cmp::max;
+use std::sync::{Arc, Mutex};
 use std::thread;
 
 use crate::core::file::FileLoad;
@@ -7,19 +8,19 @@ use crate::core::pre_process::ConfigResult;
 use crate::utils::log;
 
 pub struct Scheduler {
-    config: ConfigResult,
+    config: Arc<ConfigResult>,
     cpu_cores: usize,
-    file_load: FileLoad,
+    file_load: Arc<Mutex<FileLoad>>,
 }
 
 impl Scheduler {
-    pub fn new(config: ConfigResult) -> Scheduler {
+    pub fn new(config: Arc<ConfigResult>) -> Scheduler {
         log::info("create scheduler to manage jobs");
 
         Scheduler {
-            config,
+            config: config.clone(),
             cpu_cores: get_physical(),
-            file_load: FileLoad::new(),
+            file_load: Arc::new(Mutex::new(FileLoad::new(config))),
         }
     }
 
@@ -31,6 +32,9 @@ impl Scheduler {
 
         log::info(&format!("threads allocation: [file load & result output thread] 1, [image decode thread] 1, [calculate thread] {}", calculate_cores));
 
-        self.file_load.start();
+        let file_load = self.file_load.clone();
+        let file_load_handler = thread::spawn(move || file_load.lock().unwrap().start());
+
+        file_load_handler.join().unwrap();
     }
 }
