@@ -1,16 +1,19 @@
+use crossbeam::queue::ArrayQueue;
 use num_cpus::get_physical;
 use std::cmp::max;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 use std::thread;
 
 use crate::core::file::FileLoad;
 use crate::core::pre_process::ConfigResult;
+use crate::utils::file::ReadedFile;
 use crate::utils::log;
 
 pub struct Scheduler {
-    config: Arc<ConfigResult>,
+    _config: Arc<ConfigResult>,
     cpu_cores: usize,
     file_load: Arc<Mutex<FileLoad>>,
+    file_loaded_queue: Arc<RwLock<ArrayQueue<ReadedFile>>>,
 }
 
 impl Scheduler {
@@ -18,9 +21,10 @@ impl Scheduler {
         log::info("create scheduler to manage jobs");
 
         Scheduler {
-            config: config.clone(),
+            _config: config.clone(),
             cpu_cores: get_physical(),
-            file_load: Arc::new(Mutex::new(FileLoad::new(config))),
+            file_load: Arc::new(Mutex::new(FileLoad::new(config.clone()))),
+            file_loaded_queue: Arc::new(RwLock::new(ArrayQueue::new(config.images.len()))),
         }
     }
 
@@ -33,7 +37,9 @@ impl Scheduler {
         log::info(&format!("threads allocation: [file load & result output thread] 1, [image decode thread] 1, [calculate thread] {}", calculate_cores));
 
         let file_load = self.file_load.clone();
-        let file_load_handler = thread::spawn(move || file_load.lock().unwrap().start());
+        let file_loaded_queue = self.file_loaded_queue.clone();
+        let file_load_handler =
+            thread::spawn(move || file_load.lock().unwrap().start(file_loaded_queue));
 
         file_load_handler.join().unwrap();
     }
