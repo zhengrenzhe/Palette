@@ -23,15 +23,14 @@ fn main() {
         .args(&vec![config])
         .get_matches();
 
-    match matches.value_of("config") {
-        Some(config_path) => start(config_path),
-        None => {}
+    if let Some(config_path) = matches.value_of("config") {
+        start(config_path)
     }
 }
 
 fn start(config_path: &str) {
     let cfg = core::pre_process::pre_process(config_path);
-    if cfg.images.len() == 0 {
+    if cfg.images.is_empty() {
         return log::warning(
             "there are no jpg, png, jpeg files in the specified directory, process will stop",
         );

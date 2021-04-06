@@ -17,12 +17,9 @@ pub fn pre_process(config_path: &str) -> ConfigResult {
         Ok(mut file) => {
             let mut content = String::new();
 
-            match file.read_to_string(&mut content) {
-                Err(err) => {
-                    log::error(&format!("read config file error: {}", err));
-                    return ConfigResult { images: vec![] };
-                }
-                _ => {}
+            if let Err(err) = file.read_to_string(&mut content) {
+                log::error(&format!("read config file error: {}", err));
+                return ConfigResult { images: vec![] };
             }
 
             log::info("read the configuration successfully");
@@ -31,7 +28,7 @@ pub fn pre_process(config_path: &str) -> ConfigResult {
         }
         Err(_) => {
             log::error(&format!("config file: \"{}\" can not open", config_path));
-            return ConfigResult { images: vec![] };
+            ConfigResult { images: vec![] }
         }
     }
 }
@@ -93,10 +90,9 @@ mod tests {
 
         assert_eq!(result.images.len(), 0);
 
-        let mut valid = format!(
-            "{}",
+        let mut valid =
             "{\"image_folder_root_path\": \"PLACEHOLDER/tests/image\", \"recursion\": true}"
-        );
+                .to_string();
         valid = valid.replace("PLACEHOLDER", MANIFEST_DIR);
         let result = parse_config(valid.clone());
 

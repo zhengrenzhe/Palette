@@ -1,5 +1,6 @@
-use num_cpus;
+use num_cpus::get_physical;
 use std::cmp::max;
+use std::thread;
 
 use crate::core::file::FileLoad;
 use crate::core::pre_process::ConfigResult;
@@ -17,7 +18,7 @@ impl Scheduler {
 
         Scheduler {
             config,
-            cpu_cores: num_cpus::get_physical(),
+            cpu_cores: get_physical(),
             file_load: FileLoad::new(),
         }
     }
@@ -29,5 +30,7 @@ impl Scheduler {
         let calculate_cores = max(self.cpu_cores - 2, 1);
 
         log::info(&format!("threads allocation: [file load & result output thread] 1, [image decode thread] 1, [calculate thread] {}", calculate_cores));
+
+        self.file_load.start();
     }
 }
