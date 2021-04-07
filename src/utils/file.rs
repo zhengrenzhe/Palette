@@ -5,8 +5,8 @@ use std::sync::Arc;
 use crate::utils::log;
 
 pub struct ReadedFile {
-    _descriptor: Arc<File>,
-    buffer: Arc<Vec<u8>>,
+    pub descriptor: Arc<File>,
+    pub buffer: Arc<Vec<u8>>,
 }
 
 pub fn read(path: &str) -> Option<ReadedFile> {
@@ -17,7 +17,7 @@ pub fn read(path: &str) -> Option<ReadedFile> {
             if file.read_to_end(&mut buf).is_ok() {
                 log::success(&format!("read file {} success", path));
                 return Some(ReadedFile {
-                    _descriptor: Arc::new(file),
+                    descriptor: Arc::new(file),
                     buffer: Arc::new(buf),
                 });
             }
