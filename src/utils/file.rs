@@ -36,7 +36,7 @@ pub fn read(path: &str) -> Option<ReadedFile> {
 mod tests {
     use super::*;
 
-    const MANIFEST_DIR: &'static str = env!("CARGO_MANIFEST_DIR");
+    const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
 
     #[test]
     fn test_load() {
