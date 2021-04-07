@@ -7,18 +7,25 @@ use crate::utils::log;
 
 pub struct FileLoad {
     config_result: Arc<ConfigResult>,
+    file_loaded_queue: Arc<RwLock<ArrayQueue<ReadedFile>>>,
 }
 
 impl FileLoad {
-    pub fn new(config_result: Arc<ConfigResult>) -> FileLoad {
-        FileLoad { config_result }
+    pub fn new(
+        config_result: Arc<ConfigResult>,
+        file_loaded_queue: Arc<RwLock<ArrayQueue<ReadedFile>>>,
+    ) -> FileLoad {
+        FileLoad {
+            config_result,
+            file_loaded_queue,
+        }
     }
 
-    pub fn start(&self, file_loaded_queue: Arc<RwLock<ArrayQueue<ReadedFile>>>) {
+    pub fn start(&self) {
         let images = self.config_result.images.clone();
         log::info(&format!("start load {} images", images.len()));
 
-        match file_loaded_queue.read() {
+        match self.file_loaded_queue.read() {
             Ok(queue) => {
                 for img in images.iter() {
                     match read(img) {
