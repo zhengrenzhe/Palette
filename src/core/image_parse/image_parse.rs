@@ -1,8 +1,6 @@
 use crossbeam::queue::ArrayQueue;
-use std::sync::mpsc::Receiver;
 use std::sync::{Arc, RwLock};
 
-use crate::core::scheduler::SchedulerChannelMsg;
 use crate::utils::file::ReadedFile;
 use crate::utils::log;
 
@@ -17,16 +15,9 @@ impl ImageParse {
 
     pub fn start(&self) {
         log::info("create image parse thread");
-        // for msg in receiver {
-        //     match msg {
-        //         SchedulerChannelMsg::ImageLoaded => {
-        //             match self.file_loaded_queue.read().unwrap().pop() {
-        //                 None => log::info("no file"),
-        //                 Some(_) => log::info("got file"),
-        //             }
-        //         }
-        //         _ => {}
-        //     }
-        // }
+        match self.file_loaded_queue.read().unwrap().pop() {
+            None => log::info("no file"),
+            Some(_) => log::info("got file"),
+        }
     }
 }

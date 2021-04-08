@@ -1,18 +1,20 @@
+use crossbeam::channel::unbounded;
 use crossbeam::queue::ArrayQueue;
 use num_cpus::get_physical;
 use std::cmp::max;
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::{Arc, RwLock};
 use std::thread;
 
 use crate::core::file::FileLoad;
+use crate::core::image_parse::ImageParse;
 use crate::core::pre_process::ConfigResult;
+use crate::core::scheduler::SchedulerChannelMsg;
 use crate::utils::file::ReadedFile;
 use crate::utils::log;
 
 pub struct Scheduler {
-    _config: Arc<ConfigResult>,
+    config: Arc<ConfigResult>,
     cpu_cores: usize,
-    file_load: Arc<Mutex<FileLoad>>,
     file_loaded_queue: Arc<RwLock<ArrayQueue<ReadedFile>>>,
 }
 
@@ -21,9 +23,8 @@ impl Scheduler {
         log::info("create scheduler to manage jobs");
 
         Scheduler {
-            _config: config.clone(),
+            config: config.clone(),
             cpu_cores: get_physical(),
-            file_load: Arc::new(Mutex::new(FileLoad::new(config.clone()))),
             file_loaded_queue: Arc::new(RwLock::new(ArrayQueue::new(config.images.len()))),
         }
     }
@@ -36,11 +37,22 @@ impl Scheduler {
 
         log::info(&format!("threads allocation: [file load & result output thread] 1, [image decode thread] 1, [calculate thread] {}", calculate_cores));
 
-        let file_load = self.file_load.clone();
-        let file_loaded_queue = self.file_loaded_queue.clone();
-        let file_load_handler =
-            thread::spawn(move || file_load.lock().unwrap().start(file_loaded_queue));
+        let (sender, receiver) = unbounded::<SchedulerChannelMsg>();
 
-        file_load_handler.join().unwrap();
+        // 创建file_load线程，顺序加载图片，加载完成后线程退出
+        let file_load = FileLoad::new(self.config.clone(), self.file_loaded_queue.clone());
+        thread::spawn(move || file_load.start());
+
+        for _ in 0..calculate_cores {
+            let image_parse = ImageParse::new(self.file_loaded_queue.clone());
+            thread::spawn(move || image_parse.start());
+        }
+
+        for msg in receiver {
+            match msg {
+                SchedulerChannelMsg::StopScheduler => break,
+                SchedulerChannelMsg::ImageLoaded => {}
+            }
+        }
     }
 }

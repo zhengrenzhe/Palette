@@ -25,8 +25,9 @@ impl FileLoad {
         let images = self.config_result.images.clone();
         log::info(&format!("start load {} images", images.len()));
 
-        match self.file_loaded_queue.read() {
+        match self.file_loaded_queue.write() {
             Ok(queue) => {
+                // 遍历images，加载文件
                 for img in images.iter() {
                     match read(img) {
                         None => {
