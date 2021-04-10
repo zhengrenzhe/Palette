@@ -32,6 +32,6 @@ impl FileLoad {
         }
 
         self.file_loaded_queue.write().unwrap().set_all_push_done();
-        log::success("all images loaded, file load thread will exit");
+        log::success("all images loaded, this thread will exit");
     }
 }
