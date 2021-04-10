@@ -1,21 +1,19 @@
-use crossbeam::channel::unbounded;
-use crossbeam::queue::ArrayQueue;
 use num_cpus::get_physical;
 use std::cmp::max;
 use std::sync::{Arc, RwLock};
 use std::thread;
 
 use crate::core::file::FileLoad;
-use crate::core::image_parse::ImageParse;
+use crate::core::image_decode::ImageDecode;
 use crate::core::pre_process::ConfigResult;
-use crate::core::scheduler::SchedulerChannelMsg;
 use crate::utils::file::ReadedFile;
 use crate::utils::log;
+use crate::utils::queue::Queue;
 
 pub struct Scheduler {
     config: Arc<ConfigResult>,
     cpu_cores: usize,
-    file_loaded_queue: Arc<RwLock<ArrayQueue<ReadedFile>>>,
+    file_loaded_queue: Arc<RwLock<Queue<ReadedFile>>>,
 }
 
 impl Scheduler {
@@ -25,34 +23,33 @@ impl Scheduler {
         Scheduler {
             config: config.clone(),
             cpu_cores: get_physical(),
-            file_loaded_queue: Arc::new(RwLock::new(ArrayQueue::new(config.images.len()))),
+            file_loaded_queue: Arc::new(RwLock::new(Queue::new(
+                config.images.len(),
+                "file_loaded",
+            ))),
         }
     }
 
     pub fn start(&self) {
         log::info(&format!("cpu has {} physical cores", self.cpu_cores));
 
-        // 计算线程数量为：cpu物理总核数 - 文件读取线程 - 图片解码线程
         let calculate_cores = max(self.cpu_cores - 2, 1);
+
+        let mut handles = Vec::new();
 
         log::info(&format!("threads allocation: [file load & result output thread] 1, [image decode thread] 1, [calculate thread] {}", calculate_cores));
 
-        let (sender, receiver) = unbounded::<SchedulerChannelMsg>();
-
-        // 创建file_load线程，顺序加载图片，加载完成后线程退出
-        let file_load = FileLoad::new(self.config.clone(), self.file_loaded_queue.clone());
-        thread::spawn(move || file_load.start());
+        // create file load thread, load all images from config, this thread will exit after all images loaded.
+        let mut file_load = FileLoad::new(self.config.clone(), self.file_loaded_queue.clone());
+        handles.push(thread::spawn(move || file_load.start()));
 
         for _ in 0..calculate_cores {
-            let image_parse = ImageParse::new(self.file_loaded_queue.clone());
-            thread::spawn(move || image_parse.start());
+            let image_parse = ImageDecode::new(self.file_loaded_queue.clone());
+            handles.push(thread::spawn(move || image_parse.start()));
         }
 
-        for msg in receiver {
-            match msg {
-                SchedulerChannelMsg::StopScheduler => break,
-                SchedulerChannelMsg::ImageLoaded => {}
-            }
+        for handle in handles {
+            handle.join().unwrap();
         }
     }
 }

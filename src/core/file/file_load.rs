@@ -1,19 +1,19 @@
-use crossbeam::queue::ArrayQueue;
 use std::sync::{Arc, RwLock};
 
 use crate::core::pre_process::ConfigResult;
 use crate::utils::file::{read, ReadedFile};
 use crate::utils::log;
+use crate::utils::queue::Queue;
 
 pub struct FileLoad {
     config_result: Arc<ConfigResult>,
-    file_loaded_queue: Arc<RwLock<ArrayQueue<ReadedFile>>>,
+    file_loaded_queue: Arc<RwLock<Queue<ReadedFile>>>,
 }
 
 impl FileLoad {
     pub fn new(
         config_result: Arc<ConfigResult>,
-        file_loaded_queue: Arc<RwLock<ArrayQueue<ReadedFile>>>,
+        file_loaded_queue: Arc<RwLock<Queue<ReadedFile>>>,
     ) -> FileLoad {
         FileLoad {
             config_result,
@@ -21,26 +21,17 @@ impl FileLoad {
         }
     }
 
-    pub fn start(&self) {
+    pub fn start(&mut self) {
         let images = self.config_result.images.clone();
         log::info(&format!("start load {} images", images.len()));
 
-        match self.file_loaded_queue.write() {
-            Ok(queue) => {
-                // 遍历images，加载文件
-                for img in images.iter() {
-                    match read(img) {
-                        None => {
-                            log::warning(&format!("read file {} error, this file will ignore", img))
-                        }
-                        Some(image_content) => match queue.push(image_content) {
-                            Ok(_) => log::info(&format!("{} in queue success", img)),
-                            Err(_) => log::error(&format!("{} in queue error", img)),
-                        },
-                    }
-                }
-            }
-            Err(err) => log::error(&format!("get file_loaded_queue lock error: {}", err)),
+        for img in images.iter() {
+            if let Some(content) = read(img) {
+                self.file_loaded_queue.write().unwrap().push(content)
+            };
         }
+
+        self.file_loaded_queue.write().unwrap().set_all_push_done();
+        log::success("all images loaded, fild load thread will exit");
     }
 }

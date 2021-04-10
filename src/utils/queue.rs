@@ -1,34 +1,32 @@
+use crossbeam::atomic::AtomicCell;
 use crossbeam::queue::ArrayQueue;
 use std::sync::{Arc, RwLock};
 
 use crate::utils::log;
 
-enum QueueState {
-    // queue has not pushed any elements
-    NotPushed,
-
-    // queue has pushed at least one element
-    Pushed,
-}
+const NOT_PUSHED: &str = "NOT_PUSHED";
+const PUSHED: &str = "PUSHED";
 
 pub struct Queue<T> {
     queue: Arc<RwLock<ArrayQueue<T>>>,
-    state: QueueState,
+    state: AtomicCell<&'static str>,
     debug_name: &'static str,
+    all_push_done: AtomicCell<bool>,
 }
 
 impl<T> Queue<T> {
     pub fn new(cap: usize, debug_name: &'static str) -> Queue<T> {
         Queue {
             queue: Arc::new(RwLock::new(ArrayQueue::new(cap))),
-            state: QueueState::NotPushed,
+            state: AtomicCell::new(NOT_PUSHED),
             debug_name,
+            all_push_done: AtomicCell::new(false),
         }
     }
 
     // return whether the queue can start reading
     pub fn is_pushed(&self) -> bool {
-        !matches!(self.state, QueueState::NotPushed)
+        self.state.load() == PUSHED
     }
 
     // return queue is empty
@@ -36,23 +34,31 @@ impl<T> Queue<T> {
         self.queue.read().unwrap().is_empty()
     }
 
+    // return all push action is finished
+    pub fn is_all_push_done(&self) -> bool {
+        self.all_push_done.load()
+    }
+
+    // set all push action is finished
+    pub fn set_all_push_done(&self) {
+        self.all_push_done.store(true);
+    }
+
     // push item to queue
-    pub fn push(&mut self, value: T) -> bool {
+    pub fn push(&mut self, value: T) {
         match self.queue.write() {
             Ok(queue) => {
                 if queue.push(value).is_err() {
                     log::error(&format!("push item to queue:{} error", self.debug_name));
-                    return false;
+                    return;
                 }
-                self.state = QueueState::Pushed;
-                true
+                self.state.store(PUSHED)
             }
             Err(err) => {
                 log::error(&format!(
                     "get queue:{} lock error: {}",
                     self.debug_name, err
                 ));
-                false
             }
         }
     }
@@ -74,13 +80,15 @@ mod tests {
 
     #[test]
     fn test_single_queue() {
-        let mut queue: Queue<i32> = Queue::new(3, "test queue");
+        let mut queue: Queue<i32> = Queue::new(2, "test queue");
 
         assert_eq!(queue.is_empty(), true);
         assert_eq!(queue.is_pushed(), false);
+        assert_eq!(queue.is_all_push_done(), false);
 
         queue.push(1);
         queue.push(2);
+        queue.set_all_push_done();
 
         assert_eq!(queue.is_empty(), false);
         assert_eq!(queue.is_pushed(), true);
@@ -88,15 +96,21 @@ mod tests {
         assert_eq!(queue.pop(), Some(1));
         assert_eq!(queue.pop(), Some(2));
 
+        assert_eq!(queue.is_pushed(), true);
         assert_eq!(queue.is_empty(), true);
         assert_eq!(queue.is_pushed(), true);
+        assert_eq!(queue.is_all_push_done(), true);
     }
 
     #[test]
     fn test_multi_thread() {
-        let queue: Arc<RwLock<Queue<i32>>> = Arc::new(RwLock::new(Queue::new(3, "test queue")));
+        let queue: Arc<RwLock<Queue<i32>>> = Arc::new(RwLock::new(Queue::new(2, "test queue")));
         queue.write().unwrap().push(1);
         queue.write().unwrap().push(2);
+
+        assert_eq!(queue.read().unwrap().is_empty(), false);
+        assert_eq!(queue.read().unwrap().is_pushed(), true);
+        assert_eq!(queue.read().unwrap().is_all_push_done(), false);
 
         let mut handles = Vec::new();
         let barrier = Arc::new(Barrier::new(2));

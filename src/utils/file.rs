@@ -7,6 +7,7 @@ use crate::utils::log;
 pub struct ReadedFile {
     pub descriptor: Arc<File>,
     pub buffer: Arc<Vec<u8>>,
+    pub path: String,
 }
 
 pub fn read(path: &str) -> Option<ReadedFile> {
@@ -19,6 +20,7 @@ pub fn read(path: &str) -> Option<ReadedFile> {
                 return Some(ReadedFile {
                     descriptor: Arc::new(file),
                     buffer: Arc::new(buf),
+                    path: path.to_string(),
                 });
             }
 
@@ -43,7 +45,10 @@ mod tests {
         let valid_path = format!("{}/tests/image/a.png", MANIFEST_DIR);
         match read(&valid_path) {
             None => panic!(),
-            Some(f) => assert_eq!(f.buffer.len(), 1061900),
+            Some(f) => {
+                assert_eq!(f.buffer.len(), 1061900);
+                assert_eq!(f.path, valid_path);
+            }
         };
         match read("invalid_path") {
             None => {}
