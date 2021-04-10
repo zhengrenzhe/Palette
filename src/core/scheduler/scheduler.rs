@@ -1,7 +1,6 @@
 use num_cpus::get_physical;
 use std::cmp::max;
 use std::sync::{Arc, RwLock};
-use std::thread;
 
 use crate::core::file::FileLoad;
 use crate::core::image_decode::ImageDecode;
@@ -9,6 +8,7 @@ use crate::core::pre_process::ConfigResult;
 use crate::utils::file::ReadedFile;
 use crate::utils::log;
 use crate::utils::queue::Queue;
+use crate::utils::thread::new_thread;
 
 pub struct Scheduler {
     config: Arc<ConfigResult>,
@@ -41,15 +41,15 @@ impl Scheduler {
 
         // create file load thread, load all images from config, this thread will exit after all images loaded.
         let mut file_load = FileLoad::new(self.config.clone(), self.file_loaded_queue.clone());
-        handles.push(thread::spawn(move || file_load.start()));
+        handles.push(new_thread("FileLoad").spawn(move || file_load.start()));
 
         for _ in 0..calculate_cores {
-            let image_parse = ImageDecode::new(self.file_loaded_queue.clone());
-            handles.push(thread::spawn(move || image_parse.start()));
+            let image_decode = ImageDecode::new(self.file_loaded_queue.clone());
+            handles.push(new_thread("ImageDecode").spawn(move || image_decode.start()));
         }
 
         for handle in handles {
-            handle.join().unwrap();
+            handle.unwrap().join().unwrap();
         }
     }
 }

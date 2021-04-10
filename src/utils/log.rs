@@ -29,7 +29,7 @@ fn wrap(log_type: LogType) -> String {
 fn get_thread_info() -> String {
     let info = match thread::current().name() {
         None => format!("{:?}", thread::current().id()),
-        Some(name) => String::from(name),
+        Some(name) => format!("{}:{:?}", name, thread::current().id()),
     };
     format!("[{}]", info).bright_blue().to_string()
 }
