@@ -10,6 +10,7 @@ const PUSHED: &str = "PUSHED";
 pub struct Queue<T> {
     queue: Arc<RwLock<ArrayQueue<T>>>,
     state: AtomicCell<&'static str>,
+    // queue name for log
     debug_name: &'static str,
     all_push_done: AtomicCell<bool>,
 }
