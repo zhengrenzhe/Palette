@@ -14,6 +14,7 @@ glob = "0.3.0"
 num_cpus = "1.13.0"
 crossbeam = "0.8.0"
 image = "0.23.14"
+tui = "0.14.0"
 
 
 # for catch mozjpeg decode error

@@ -33,6 +33,10 @@ impl Scheduler {
     }
 
     pub fn start(&self) {
+        log::info(&format!(
+            "use {} mode",
+            if self.config.gui { "gui" } else { "log" }
+        ));
         log::info(&format!("cpu has {} physical cores", self.cpu_cores));
 
         let calculate_cores = max(self.cpu_cores - 2, 1);

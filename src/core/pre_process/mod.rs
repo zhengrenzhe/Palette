@@ -23,6 +23,7 @@ pub fn pre_process(config_path: &str) -> ConfigResult {
                 log::error(&format!("read config file error: {}", err));
                 return ConfigResult {
                     images: Arc::new(vec![]),
+                    gui: true,
                 };
             }
 
@@ -34,6 +35,7 @@ pub fn pre_process(config_path: &str) -> ConfigResult {
             log::error(&format!("config file: \"{}\" can not open", config_path));
             ConfigResult {
                 images: Arc::new(vec![]),
+                gui: true,
             }
         }
     }
@@ -47,19 +49,21 @@ fn parse_config(content: String) -> ConfigResult {
             log::error(&format!("parse config json error: {}", err));
             return ConfigResult {
                 images: Arc::new(vec![]),
+                gui: true,
             };
         }
     };
 
     log::info("parse the configuration successfully");
 
-    let images = Arc::new(scan_images(cfg_data));
-
-    ConfigResult { images }
+    ConfigResult {
+        images: Arc::new(scan_images(&cfg_data)),
+        gui: cfg_data.gui,
+    }
 }
 
-fn scan_images(cfg: ConfigModel) -> Vec<String> {
-    let root_path = cfg.image_folder_root_path;
+fn scan_images(cfg: &ConfigModel) -> Vec<String> {
+    let root_path = &cfg.image_folder_root_path;
     let recursion = cfg.recursion;
 
     let p_jpg = format!("{}{}/*.jpg", root_path, if recursion { "/**" } else { "" });
@@ -76,7 +80,7 @@ fn scan_images(cfg: ConfigModel) -> Vec<String> {
         match entry {
             Ok(path) => match path.into_os_string().into_string() {
                 Ok(path_string) => result.push(path_string),
-                Err(_) => log::warning(&format!("failed to get PathBuf")),
+                Err(_) => log::warning(&"failed to get PathBuf".to_string()),
             },
             Err(err) => log::error(&format!("glob error: {}", err)),
         }
