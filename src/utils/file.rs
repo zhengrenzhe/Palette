@@ -1,12 +1,11 @@
 use std::fs::File;
 use std::io::Read;
-use std::sync::Arc;
 
 use crate::utils::log;
 
 pub struct ReadedFile {
-    pub descriptor: Arc<File>,
-    pub buffer: Arc<Vec<u8>>,
+    pub descriptor: File,
+    pub buffer: Vec<u8>,
     pub path: String,
 }
 
@@ -18,8 +17,8 @@ pub fn read(path: &str) -> Option<ReadedFile> {
             if file.read_to_end(&mut buf).is_ok() {
                 log::success(&format!("read file {} success", path));
                 return Some(ReadedFile {
-                    descriptor: Arc::new(file),
-                    buffer: Arc::new(buf),
+                    descriptor: file,
+                    buffer: buf,
                     path: path.to_string(),
                 });
             }

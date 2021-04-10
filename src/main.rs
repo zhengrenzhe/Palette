@@ -1,4 +1,5 @@
 use clap::{App, Arg};
+use std::panic;
 use std::sync::Arc;
 
 mod commands;
@@ -10,6 +11,9 @@ use crate::utils::log;
 use crate::utils::msg_const;
 
 fn main() {
+    // catch all painc error
+    panic::set_hook(Box::new(|info| log::error(&format!("{}", info))));
+
     let config = Arg::with_name("config")
         .short("c")
         .long("config")

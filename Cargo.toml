@@ -7,11 +7,19 @@ description = "single-machine large-scale calculation of dominant color solution
 
 [dependencies]
 clap = "2.33.0"
-mozjpeg = "0.8.24"
-png = "0.16.8"
 serde = { version = "1.0.125", features = ["derive"] }
 serde_json = "1.0.64"
 colored = "2.0.0"
 glob = "0.3.0"
 num_cpus = "1.13.0"
 crossbeam = "0.8.0"
+image = "0.23.14"
+
+
+# for catch mozjpeg decode error
+[profile.dev]
+panic = "unwind"
+
+# for catch mozjpeg decode error
+[profile.release]
+panic = "unwind"

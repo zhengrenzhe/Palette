@@ -1,16 +1,25 @@
 use std::sync::{Arc, RwLock};
 
+use crate::core::image_decode::decode;
+use crate::core::image_decode::ImageRaw;
 use crate::utils::file::ReadedFile;
 use crate::utils::log;
 use crate::utils::queue::Queue;
 
 pub struct ImageDecode {
     file_loaded_queue: Arc<RwLock<Queue<ReadedFile>>>,
+    image_raw_queue: Arc<RwLock<Queue<ImageRaw>>>,
 }
 
 impl ImageDecode {
-    pub fn new(file_loaded_queue: Arc<RwLock<Queue<ReadedFile>>>) -> ImageDecode {
-        ImageDecode { file_loaded_queue }
+    pub fn new(
+        file_loaded_queue: Arc<RwLock<Queue<ReadedFile>>>,
+        image_raw_queue: Arc<RwLock<Queue<ImageRaw>>>,
+    ) -> ImageDecode {
+        ImageDecode {
+            file_loaded_queue,
+            image_raw_queue,
+        }
     }
 
     pub fn start(&self) {
@@ -18,7 +27,19 @@ impl ImageDecode {
         loop {
             if let Ok(queue) = self.file_loaded_queue.read() {
                 if let Some(f) = queue.pop() {
-                    log::info(&format!("got file {}", f.path));
+                    match decode(f.buffer) {
+                        Ok(bytes) => {
+                            log::success(&format!("image:{} decode success", &f.path));
+
+                            self.image_raw_queue
+                                .write()
+                                .unwrap()
+                                .push(ImageRaw::new(bytes, f.path));
+                        }
+                        Err(err) => {
+                            log::error(&format!("decode {} is error: {}", &f.path, err));
+                        }
+                    };
                 }
 
                 if queue.is_pushed() && queue.is_empty() && queue.is_all_push_done() {
