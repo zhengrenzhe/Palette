@@ -92,8 +92,7 @@ fn scan_images(cfg: &ConfigModel) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
+    use crate::utils::msg_const::PROJ_DIR;
 
     #[test]
     fn test_parse_config() {
@@ -105,9 +104,9 @@ mod tests {
         let mut valid =
             "{\"image_folder_root_path\": \"PLACEHOLDER/tests/image\", \"recursion\": true}"
                 .to_string();
-        valid = valid.replace("PLACEHOLDER", MANIFEST_DIR);
-        let result = parse_config(valid.clone());
+        valid = valid.replace("PLACEHOLDER", PROJ_DIR);
+        let result = parse_config(valid);
 
-        assert_eq!(result.images.len(), 4);
+        assert_eq!(result.images.len(), 20);
     }
 }

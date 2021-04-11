@@ -36,12 +36,11 @@ pub fn read(path: &str) -> Option<ReadedFile> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
+    use crate::utils::msg_const::PROJ_DIR;
 
     #[test]
     fn test_load() {
-        let valid_path = format!("{}/tests/image/a.png", MANIFEST_DIR);
+        let valid_path = format!("{}/tests/image/a.png", PROJ_DIR);
         match read(&valid_path) {
             None => panic!(),
             Some(f) => {
