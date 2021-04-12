@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::Write;
 
+/// this function only used to test whether image decode is correct
 #[allow(dead_code)]
 pub fn write_to_ppm(buffer: Vec<u8>, path: String, width: usize, height: usize) {
     match File::create(path) {
@@ -9,13 +10,10 @@ pub fn write_to_ppm(buffer: Vec<u8>, path: String, width: usize, height: usize) 
             f.write_all(header.as_bytes()).unwrap();
             for y in 0..height {
                 for x in (0..(width * 3)).step_by(3) {
-                    let c = format!(
-                        "{} {} {}\n",
-                        buffer.get(y * width * 3 + x).unwrap(),
-                        buffer.get(y * width * 3 + x + 1).unwrap(),
-                        buffer.get(y * width * 3 + x + 2).unwrap()
-                    );
-                    f.write_all(c.as_bytes()).unwrap();
+                    let base = y * width * 3 + x;
+                    f.write_all(&[*buffer.get(base).unwrap()]).unwrap();
+                    f.write_all(&[*buffer.get(base + 1).unwrap()]).unwrap();
+                    f.write_all(&[*buffer.get(base + 2).unwrap()]).unwrap();
                 }
             }
         }
