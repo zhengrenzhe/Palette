@@ -1,10 +1,23 @@
 use std::fs::File;
 use std::io::Write;
 
-pub fn write_to_ppm(buffer: Vec<u8>, path: String, width: i32, height: i32) {
+#[allow(dead_code)]
+pub fn write_to_ppm(buffer: Vec<u8>, path: String, width: usize, height: usize) {
     match File::create(path) {
         Ok(mut f) => {
-            let t = f.write(format!("P6\n{} {}\n255\n", width, height).as_bytes());
+            let header = format!("P6\n{} {}\n255\n", width, height);
+            f.write_all(header.as_bytes()).unwrap();
+            for y in 0..height {
+                for x in (0..(width * 3)).step_by(3) {
+                    let c = format!(
+                        "{} {} {}\n",
+                        buffer.get(y * width * 3 + x).unwrap(),
+                        buffer.get(y * width * 3 + x + 1).unwrap(),
+                        buffer.get(y * width * 3 + x + 2).unwrap()
+                    );
+                    f.write_all(c.as_bytes()).unwrap();
+                }
+            }
         }
         Err(err) => {
             println!("write_to_ppm err: {}", err);
@@ -15,10 +28,30 @@ pub fn write_to_ppm(buffer: Vec<u8>, path: String, width: i32, height: i32) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::image_decode::decode;
+    use crate::utils::file::read;
     use crate::utils::msg_const::PROJ_DIR;
+    use std::convert::TryFrom;
 
     #[test]
     fn test_write_to_ppm() {
-        write_to_ppm(Vec::new(), format!("{}/target/out.ppm", PROJ_DIR), 5, 5);
+        write_to_ppm(
+            vec![1, 2, 3, 4, 5, 6],
+            format!("{}/target/out.ppm", PROJ_DIR),
+            2,
+            1,
+        );
+    }
+
+    #[test]
+    fn test_write_image_to_ppm() {
+        let f = read(&format!("{}/tests/image/a.png", PROJ_DIR)).unwrap();
+        let d = decode(f.buffer).unwrap();
+        write_to_ppm(
+            d.buffer,
+            format!("{}/target/a.ppm", PROJ_DIR),
+            usize::try_from(d.width).unwrap(),
+            usize::try_from(d.height).unwrap(),
+        )
     }
 }

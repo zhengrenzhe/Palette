@@ -28,13 +28,13 @@ impl ImageDecode {
             if let Ok(queue) = self.file_loaded_queue.read() {
                 if let Some(f) = queue.pop() {
                     match decode(f.buffer) {
-                        Ok(bytes) => {
+                        Ok(decoded) => {
                             log::success(&format!("image:{} decode success", &f.path));
 
                             self.image_raw_queue
                                 .write()
                                 .unwrap()
-                                .push(ImageRaw::new(bytes, f.path));
+                                .push(ImageRaw::new(decoded, f.path));
                         }
                         Err(err) => {
                             log::error(&format!("decode {} is error: {}", &f.path, err));

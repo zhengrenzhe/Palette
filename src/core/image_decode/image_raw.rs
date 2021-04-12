@@ -1,10 +1,12 @@
+use crate::core::image_decode::DecodedImage;
+
 pub struct ImageRaw {
-    pub bytes: Vec<u8>,
     pub path: String,
+    pub decoded: DecodedImage,
 }
 
 impl ImageRaw {
-    pub fn new(bytes: Vec<u8>, path: String) -> ImageRaw {
-        ImageRaw { bytes, path }
+    pub fn new(decoded: DecodedImage, path: String) -> ImageRaw {
+        ImageRaw { decoded, path }
     }
 }
