@@ -30,6 +30,7 @@ mod tests {
     use crate::utils::file::read;
     use crate::utils::msg_const::PROJ_DIR;
     use std::convert::TryFrom;
+    use std::fs::File;
 
     #[test]
     fn test_write_to_ppm() {
@@ -45,11 +46,15 @@ mod tests {
     fn test_write_image_to_ppm() {
         let f = read(&format!("{}/tests/image/a.png", PROJ_DIR)).unwrap();
         let d = decode(f.buffer).unwrap();
+        let output = format!("{}/target/a.ppm", PROJ_DIR);
         write_to_ppm(
             d.buffer,
-            format!("{}/target/a.ppm", PROJ_DIR),
+            output.clone(),
             usize::try_from(d.width).unwrap(),
             usize::try_from(d.height).unwrap(),
-        )
+        );
+        let f = File::open(output).unwrap();
+        // if assert is true, image decode is correct
+        assert_eq!(f.metadata().unwrap().len(), 5674049);
     }
 }
