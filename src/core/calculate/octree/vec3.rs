@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub};
+use std::ops::{Add, Mul, Sub};
 
 pub struct Vec3 {
     pub x: f64,
@@ -10,13 +10,9 @@ impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Vec3 {
         Vec3 { x, y, z }
     }
-
-    pub fn mul(&self, num: f64) -> Vec3 {
-        Vec3::new(self.x * num, self.y * num, self.z * num)
-    }
 }
 
-/// vec3 + vec3
+/// Vec3 + Vec3
 impl Add for Vec3 {
     type Output = Self;
 
@@ -25,12 +21,21 @@ impl Add for Vec3 {
     }
 }
 
-/// vec3 - vec3
+/// Vec3 - Vec3
 impl Sub for Vec3 {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
         Vec3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+    }
+}
+
+/// Vec3 * n
+impl Mul<f64> for Vec3 {
+    type Output = Self;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        Vec3::new(self.x * rhs, self.y * rhs, self.z * rhs)
     }
 }
 
@@ -57,7 +62,7 @@ mod tests {
 
     #[test]
     fn test_vec3_mul() {
-        let r = Vec3::new(8.0, 7.0, 6.0).mul(4.0);
+        let r = Vec3::new(8.0, 7.0, 6.0) * 4.0;
         assert!(approx_eq!(f64, r.x, 32.0));
         assert!(approx_eq!(f64, r.y, 28.0));
         assert!(approx_eq!(f64, r.z, 24.0));
