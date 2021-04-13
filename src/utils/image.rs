@@ -27,7 +27,6 @@ pub fn write_to_ppm(buffer: Vec<u8>, path: String, width: usize, height: usize) 
 mod tests {
     use crate::utils::image::write_to_ppm;
     use crate::utils::msg_const::PROJ_DIR;
-    use std::convert::TryFrom;
     use std::fs::File;
 
     #[test]
