@@ -25,36 +25,18 @@ pub fn write_to_ppm(buffer: Vec<u8>, path: String, width: usize, height: usize) 
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::core::image_decode::decode;
-    use crate::utils::file::read;
+    use crate::utils::image::write_to_ppm;
     use crate::utils::msg_const::PROJ_DIR;
     use std::convert::TryFrom;
     use std::fs::File;
 
     #[test]
     fn test_write_to_ppm() {
-        write_to_ppm(
-            vec![1, 2, 3, 4, 5, 6],
-            format!("{}/target/out.ppm", PROJ_DIR),
-            2,
-            1,
-        );
-    }
+        let output = format!("{}/target/out.ppm", PROJ_DIR);
+        write_to_ppm(vec![1, 2, 3, 4, 5, 6], output.clone(), 2, 1);
 
-    #[test]
-    fn test_write_image_to_ppm() {
-        let f = read(&format!("{}/tests/image/a.png", PROJ_DIR)).unwrap();
-        let d = decode(f.buffer).unwrap();
-        let output = format!("{}/target/a.ppm", PROJ_DIR);
-        write_to_ppm(
-            d.buffer,
-            output.clone(),
-            usize::try_from(d.width).unwrap(),
-            usize::try_from(d.height).unwrap(),
-        );
         let f = File::open(output).unwrap();
-        // if assert is true, image decode is correct
-        assert_eq!(f.metadata().unwrap().len(), 5674049);
+        // if assert is true, write ppm is correct
+        assert_eq!(f.metadata().unwrap().len(), 17);
     }
 }
