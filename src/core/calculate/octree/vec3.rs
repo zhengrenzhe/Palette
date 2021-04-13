@@ -37,28 +37,29 @@ impl Sub for Vec3 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use float_cmp::approx_eq;
 
     #[test]
     fn test_vec3_add() {
         let r = Vec3::new(1.0, 2.0, 3.0) + Vec3::new(4.0, 5.0, 6.0);
-        assert_eq!(r.x, 5.0_f64);
-        assert_eq!(r.y, 7.0_f64);
-        assert_eq!(r.z, 9.0_f64);
+        assert!(approx_eq!(f64, r.x, 5.0));
+        assert!(approx_eq!(f64, r.y, 7.0));
+        assert!(approx_eq!(f64, r.z, 9.0));
     }
 
     #[test]
     fn test_vec3_sub() {
         let r = Vec3::new(8.0, 7.0, 6.0) - Vec3::new(1.0, 2.0, 3.0);
-        assert_eq!(r.x, 7.0_f64);
-        assert_eq!(r.y, 5.0_f64);
-        assert_eq!(r.z, 3.0_f64);
+        assert!(approx_eq!(f64, r.x, 7.0));
+        assert!(approx_eq!(f64, r.y, 5.0));
+        assert!(approx_eq!(f64, r.z, 3.0));
     }
 
     #[test]
     fn test_vec3_mul() {
         let r = Vec3::new(8.0, 7.0, 6.0).mul(4.0);
-        assert_eq!(r.x, 32.0_f64);
-        assert_eq!(r.y, 28.0_f64);
-        assert_eq!(r.z, 24.0_f64);
+        assert!(approx_eq!(f64, r.x, 32.0));
+        assert!(approx_eq!(f64, r.y, 28.0));
+        assert!(approx_eq!(f64, r.z, 24.0));
     }
 }

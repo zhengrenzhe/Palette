@@ -18,6 +18,7 @@ tui = "0.14.0"
 termion = "1.5.6"
 lazy_static = "1.4.0"
 const_format = "0.2.14"
+float-cmp = "0.8.0"
 
 # for catch mozjpeg decode error
 [profile.dev]
