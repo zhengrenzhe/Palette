@@ -1,3 +1,4 @@
+mod point;
 mod vec3;
 
 pub struct Octree {}
