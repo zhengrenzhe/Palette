@@ -4,12 +4,20 @@
 
 single-machine large-scale calculation of dominant color solution
 
-## develop
+## usage
 
 ```shell
 git clone https://github.com/zhengrenzhe/Orion.git
-
-cargo test # run unit tests
-
 cargo run -- -c ./tests/example.json # calculate test images
+```
+## test
+```shell
+cargo test
+```
+
+## test debug output
+```shell
+cargo test
+open target/a.ppm # view png decode result (as ppm)
+open target/b.ppm # view jpg decode result (as ppm)
 ```

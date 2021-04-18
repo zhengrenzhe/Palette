@@ -35,8 +35,8 @@ pub fn decode(buffer: Vec<u8>) -> Result<DecodedImage, Error> {
 #[cfg(test)]
 mod tests {
     use crate::core::image_decode::decode;
+    use crate::utils::debug_tools::ppm::write_to_ppm;
     use crate::utils::file::read;
-    use crate::utils::image::write_to_ppm;
     use crate::utils::msg_const::PROJ_DIR;
     use std::convert::TryFrom;
     use std::fs::File;
