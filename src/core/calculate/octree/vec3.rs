@@ -1,5 +1,6 @@
 use std::ops::{Add, Mul, Sub};
 
+#[derive(Copy, Clone, Debug)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -66,5 +67,20 @@ mod tests {
         assert!(approx_eq!(f64, r.x, 32.0));
         assert!(approx_eq!(f64, r.y, 28.0));
         assert!(approx_eq!(f64, r.z, 24.0));
+    }
+
+    #[test]
+    fn test_copy_clone() {
+        let a = Vec3::new(1.0, 1.0, 1.0);
+        let mut b = a;
+        b.x = 2.0;
+        b.y = 2.0;
+        b.z = 2.0;
+        assert!(approx_eq!(f64, a.x, 1.0));
+        assert!(approx_eq!(f64, a.y, 1.0));
+        assert!(approx_eq!(f64, a.z, 1.0));
+        assert!(approx_eq!(f64, b.x, 2.0));
+        assert!(approx_eq!(f64, b.y, 2.0));
+        assert!(approx_eq!(f64, b.z, 2.0));
     }
 }

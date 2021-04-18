@@ -1,12 +1,13 @@
 use crate::core::calculate::octree::vec3::Vec3;
 
-pub struct Point<T> {
+#[derive(Copy, Clone, Debug)]
+pub struct Point {
     pub position: Vec3,
-    pub payload: T,
+    pub payload: i32,
 }
 
-impl<T> Point<T> {
-    pub fn new(position: Vec3, payload: T) -> Point<T> {
+impl Point {
+    pub fn new(position: Vec3, payload: i32) -> Point {
         Point { position, payload }
     }
 
@@ -14,7 +15,7 @@ impl<T> Point<T> {
         self.position = position
     }
 
-    pub fn update_payload(&mut self, payload: T) {
+    pub fn update_payload(&mut self, payload: i32) {
         self.payload = payload
     }
 }
