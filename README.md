@@ -15,7 +15,7 @@ cargo run -- -c ./tests/example.json # calculate test images
 cargo test
 ```
 
-## test debug output
+## view test output
 ```shell
 cargo test
 open target/a.ppm # view png decode result (as ppm)
