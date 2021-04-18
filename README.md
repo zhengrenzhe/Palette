@@ -7,7 +7,7 @@ single-machine large-scale calculation of dominant color solution
 ## usage
 
 ```shell
-https://github.com/zhengrenzhe/Palette.git
+git clone https://github.com/zhengrenzhe/Palette.git
 cargo run -- -c ./tests/example.json # calculate test images
 ```
 ## test
