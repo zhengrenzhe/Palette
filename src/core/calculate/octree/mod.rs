@@ -3,6 +3,7 @@ use crate::core::calculate::octree::vec3::Vec3;
 use std::mem::replace;
 
 mod point;
+mod utils;
 mod vec3;
 
 #[derive(Debug)]
